@@ -7,21 +7,17 @@ public class QuizService {
     public static List<QuizAttempt> conductQuiz(Quiz quiz, List<Student> students, Scanner sc) {
         List<QuizAttempt> attempts = new ArrayList<>();
         for (int i = 0; i < students.size(); i++) {
-            QuizAttempt attempt = conductAttemptForStudent(quiz, students.get(i), i + 1, sc);
+            Student student = students.get(i);
+            QuizAttempt attempt = new QuizAttempt(student, quiz);
+
+            printStudentHeader(student, i + 1);
+            askAllQuestions(quiz, attempt, sc);
+            finalizeAndPrintScore(attempt);
+
             attempts.add(attempt);
         }
 
         return attempts;
-    }
-
-    private static QuizAttempt conductAttemptForStudent(Quiz quiz, Student student, int studentNumber, Scanner sc) {
-        QuizAttempt attempt = new QuizAttempt(student, quiz);
-
-        printStudentHeader(student, studentNumber);
-        askAllQuestions(quiz, attempt, sc);
-        finalizeAndPrintScore(attempt);
-
-        return attempt;
     }
 
     private static void printStudentHeader(Student student, int studentNumber) {
@@ -34,14 +30,11 @@ public class QuizService {
 
     private static void askAllQuestions(Quiz quiz, QuizAttempt attempt, Scanner sc) {
         for (Question question : quiz.getQuestions()) {
-            askSingleQuestion(question, attempt, sc);
+            displayQuestion(question);
+            int optionCount = question.getOptions().size();
+            int choice = InputHelper.readIntInRange(sc, "Enter answer (1-" + optionCount + "): ", 1, optionCount);
+            attempt.submitAnswer(question, choice);
         }
-    }
-
-    private static void askSingleQuestion(Question question, QuizAttempt attempt, Scanner sc) {
-        displayQuestion(question);
-        int choice = readValidChoice(sc, question.getOptions().size());
-        attempt.submitAnswer(question, choice);
     }
 
     private static void displayQuestion(Question question) {
@@ -50,10 +43,6 @@ public class QuizService {
         for (int i = 0; i < options.size(); i++) {
             System.out.println((i + 1) + ". " + options.get(i));
         }
-    }
-
-    private static int readValidChoice(Scanner sc, int optionCount) {
-        return InputHelper.readIntInRange(sc, "Enter answer (1-" + optionCount + "): ", 1, optionCount);
     }
 
     private static void finalizeAndPrintScore(QuizAttempt attempt) {

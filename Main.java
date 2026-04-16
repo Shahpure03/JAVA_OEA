@@ -10,15 +10,17 @@ public class Main {
         System.out.println("===== QUIZ MANAGEMENT SYSTEM =====\n");
 
         try (Scanner sc = new Scanner(System.in)) {
-            createStudents(manager, sc);
-            displayStudents(manager);
+            List<Student> students = createStudents(manager, sc);
+            System.out.println("\nStudents Registered:");
+            manager.displayAllStudents();
+            System.out.println();
             createQuizzes(manager, sc);
             displayQuizzes(manager);
-            conductAllQuizzes(manager, sc);
+            conductAllQuizzes(manager, students, sc);
         }
     }
 
-    private static void createStudents(QuizManager manager, Scanner sc) {
+    private static List<Student> createStudents(QuizManager manager, Scanner sc) {
         int studentCount = InputHelper.readPositiveInt(sc, "Enter number of students: ");
 
         for (int i = 1; i <= studentCount; i++) {
@@ -30,12 +32,8 @@ public class Main {
 
             manager.addStudent(new Student(id, name, branch));
         }
-    }
 
-    private static void displayStudents(QuizManager manager) {
-        System.out.println("\nStudents Registered:");
-        manager.displayAllStudents();
-        System.out.println();
+        return manager.getAllStudents();
     }
 
     private static void createQuizzes(QuizManager manager, Scanner sc) {
@@ -51,24 +49,19 @@ public class Main {
         manager.displayAllQuizzes();
     }
 
-    private static void conductAllQuizzes(QuizManager manager, Scanner sc) {
-        List<Student> students = manager.getAllStudents();
+    private static void conductAllQuizzes(QuizManager manager, List<Student> students, Scanner sc) {
         for (int quizId : manager.getAllQuizIds()) {
-            conductSingleQuiz(manager, quizId, students, sc);
+            Quiz quiz = manager.getQuizById(quizId);
+            if (quiz == null) {
+                continue;
+            }
+
+            System.out.println("\n===== ATTEMPT QUIZ ID " + quizId + ": " + quiz.getTitle() + " =====");
+            List<QuizAttempt> quizAttempts = QuizService.conductQuiz(quiz, students, sc);
+            manager.recordAttempts(quizAttempts);
+
+            System.out.println();
+            manager.displayLeaderboard(quiz);
         }
-    }
-
-    private static void conductSingleQuiz(QuizManager manager, int quizId, List<Student> students, Scanner sc) {
-        Quiz quiz = manager.getQuizById(quizId);
-        if (quiz == null) {
-            return;
-        }
-
-        System.out.println("\n===== ATTEMPT QUIZ ID " + quizId + ": " + quiz.getTitle() + " =====");
-        List<QuizAttempt> quizAttempts = QuizService.conductQuiz(quiz, students, sc);
-        manager.recordAttempts(quizAttempts);
-
-        System.out.println();
-        manager.displayLeaderboard(quiz);
     }
 }
