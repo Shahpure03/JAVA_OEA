@@ -3,16 +3,14 @@ import java.util.Comparator;
 public class ScoreComparator implements Comparator<QuizAttempt> {
 
     @Override
-    public int compare(QuizAttempt a1, QuizAttempt a2) {
-
-        int scoreCompare = Double.compare(a2.getScore(), a1.getScore());
-
-        if (scoreCompare != 0) {
-            return scoreCompare;
+    public int compare(QuizAttempt first, QuizAttempt second) {
+        int byScore = Double.compare(second.getScore(), first.getScore());
+        if (byScore != 0) {
+            return byScore;
         }
 
-        // Tie-breaker → sort by name
-        return a1.getStudent().getName()
-                .compareToIgnoreCase(a2.getStudent().getName());
+        // Tie-breaker: sort by student name.
+        return first.getStudent().getName()
+                .compareToIgnoreCase(second.getStudent().getName());
     }
 }

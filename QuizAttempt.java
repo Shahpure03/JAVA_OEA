@@ -1,10 +1,12 @@
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 public class QuizAttempt {
 
     private final Student student;
     private final Quiz quiz;
-    private final Map<Question, Integer> answers; // Question → chosen option
+    private final Map<Question, Integer> answers; // Question -> chosen option
     private double score;
 
     public QuizAttempt(Student student, Quiz quiz) {
@@ -14,8 +16,8 @@ public class QuizAttempt {
         this.score = 0.0;
     }
 
-    public void submitAnswer(Question q, int chosenOption) {
-        answers.put(q, chosenOption);
+    public void submitAnswer(Question question, int chosenOption) {
+        answers.put(question, chosenOption);
     }
 
     public void evaluateScore() {

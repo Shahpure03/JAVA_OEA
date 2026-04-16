@@ -1,11 +1,14 @@
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 
 public class Quiz {
 
     private final int quizId;
-    private String title;
-    private String subject;
-    private List<Question> questions;
+    private final String title;
+    private final String subject;
+    private final List<Question> questions;
 
     public Quiz(int quizId, String title, String subject) {
         this.quizId = quizId;
@@ -27,7 +30,7 @@ public class Quiz {
     }
 
     public List<Question> getQuestions() {
-        return questions;
+        return Collections.unmodifiableList(questions);
     }
 
     public void addQuestion(Question q) {

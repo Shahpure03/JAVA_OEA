@@ -1,50 +1,63 @@
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
 
 public class QuizBuilder {
 
-    public static Quiz createQuiz(Scanner sc) {
-
-        System.out.println("===== CREATE QUIZ =====");
-
-        System.out.print("Enter Quiz Title: ");
-        String title = sc.nextLine();
-
-        System.out.print("Enter Subject: ");
-        String subject = sc.nextLine();
-
-        Quiz quiz = new Quiz(1, title, subject);
-
-        System.out.print("Enter number of questions: ");
-        int qCount = sc.nextInt();
-        sc.nextLine();
-
-        for (int i = 1; i <= qCount; i++) {
-
-            System.out.println("\n--- Question " + i + " ---");
-
-            System.out.print("Enter question text: ");
-            String qText = sc.nextLine();
-
-            List<String> options = new ArrayList<>();
-
-            for (int j = 1; j <= 4; j++) {
-                System.out.print("Enter option " + j + ": ");
-                options.add(sc.nextLine());
-            }
-
-            int correct;
-            while (true) {
-                System.out.print("Enter correct option (1-4): ");
-                correct = sc.nextInt();
-                sc.nextLine();
-
-                if (correct >= 1 && correct <= 4) break;
-                System.out.println("Invalid input. Try again.");
-            }
-
-            quiz.addQuestion(new Question(i, qText, options, correct));
-        }
-
+    public static Quiz createQuiz(Scanner sc, int quizId) {
+        printQuizHeader(quizId);
+        String title = readQuizTitle(sc);
+        String subject = readQuizSubject(sc);
+        Quiz quiz = new Quiz(quizId, title, subject);
+        int questionCount = readQuestionCount(sc);
+        addQuestionsToQuiz(quiz, questionCount, sc);
         return quiz;
+    }
+
+    private static void printQuizHeader(int quizId) {
+        System.out.println("===== CREATE QUIZ " + quizId + " =====");
+    }
+
+    private static String readQuizTitle(Scanner sc) {
+        return InputHelper.readNonEmptyLine(sc, "Enter Quiz Title: ");
+    }
+
+    private static String readQuizSubject(Scanner sc) {
+        return InputHelper.readNonEmptyLine(sc, "Enter Subject: ");
+    }
+
+    private static int readQuestionCount(Scanner sc) {
+        return InputHelper.readPositiveInt(sc, "Enter number of questions: ");
+    }
+
+    private static void addQuestionsToQuiz(Quiz quiz, int questionCount, Scanner sc) {
+        for (int questionId = 1; questionId <= questionCount; questionId++) {
+            Question question = buildQuestion(questionId, sc);
+            quiz.addQuestion(question);
+        }
+    }
+
+    private static Question buildQuestion(int questionId, Scanner sc) {
+        System.out.println("\n--- Question " + questionId + " ---");
+        String questionText = readQuestionText(sc);
+        List<String> options = readOptions(sc, 4);
+        int correctOption = readCorrectOption(sc, options.size());
+        return new Question(questionId, questionText, options, correctOption);
+    }
+
+    private static String readQuestionText(Scanner sc) {
+        return InputHelper.readNonEmptyLine(sc, "Enter question text: ");
+    }
+
+    private static List<String> readOptions(Scanner sc, int optionCount) {
+        List<String> options = new ArrayList<>();
+        for (int optionNumber = 1; optionNumber <= optionCount; optionNumber++) {
+            options.add(InputHelper.readNonEmptyLine(sc, "Enter option " + optionNumber + ": "));
+        }
+        return options;
+    }
+
+    private static int readCorrectOption(Scanner sc, int optionCount) {
+        return InputHelper.readIntInRange(sc, "Enter correct option (1-" + optionCount + "): ", 1, optionCount);
     }
 }

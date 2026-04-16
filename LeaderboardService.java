@@ -1,28 +1,31 @@
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 public class LeaderboardService {
 
-        public static void displayLeaderboard(List<QuizAttempt> attempts) {
+    public static void displayQuizLeaderboard(Quiz quiz, List<QuizAttempt> attempts) {
+        List<QuizAttempt> sortedAttempts = new ArrayList<>(attempts);
+        Collections.sort(sortedAttempts, new ScoreComparator());
 
-                // Sort using Comparator
-                Collections.sort(attempts, new ScoreComparator());
+        System.out.println("\n===== LEADERBOARD: " + quiz.getTitle() + " =====");
+        printRanks(sortedAttempts);
+        printTopper(sortedAttempts);
+    }
 
-                System.out.println("\n===== FINAL LEADERBOARD =====");
-
-                int rank = 1;
-                for (QuizAttempt a : attempts) {
-                        System.out.println(rank + ". " +
-                                        a.getStudent().getName() +
-                                        " Score: " + a.getScore());
-                        rank++;
-                }
-
-                // Topper
-                System.out.println("\n===== TOPPER =====");
-
-                attempts.stream()
-                                .max(Comparator.comparingDouble(QuizAttempt::getScore))
-                                .ifPresent(t -> System.out.println(
-                                                "Topper: " + t.getStudent().getName()));
+    private static void printRanks(List<QuizAttempt> sortedAttempts) {
+        int rank = 1;
+        for (QuizAttempt attempt : sortedAttempts) {
+            System.out.println(rank + ". " + attempt.getStudent().getName() + " Score: " + attempt.getScore());
+            rank++;
         }
+    }
+
+    private static void printTopper(List<QuizAttempt> sortedAttempts) {
+        System.out.println("\n===== TOPPER =====");
+        sortedAttempts.stream()
+                .max(Comparator.comparingDouble(QuizAttempt::getScore))
+                .ifPresent(topper -> System.out.println("Topper: " + topper.getStudent().getName()));
+    }
 }
