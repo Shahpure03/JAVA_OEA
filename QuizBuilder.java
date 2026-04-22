@@ -4,8 +4,9 @@ import java.util.Scanner;
 
 public class QuizBuilder {
 
-    public static Quiz createQuiz(Scanner sc, int quizId) {
-        printQuizHeader(quizId);
+    public static Quiz buildQuiz(Scanner sc) {
+        int quizId = readQuizId(sc);
+        System.out.println("===== CREATE QUIZ " + quizId + " =====");
         String title = readQuizTitle(sc);
         String subject = readQuizSubject(sc);
         Quiz quiz = new Quiz(quizId, title, subject);
@@ -14,8 +15,8 @@ public class QuizBuilder {
         return quiz;
     }
 
-    private static void printQuizHeader(int quizId) {
-        System.out.println("===== CREATE QUIZ " + quizId + " =====");
+    private static int readQuizId(Scanner sc) {
+        return InputHelper.readPositiveInt(sc, "Enter Quiz ID: ");
     }
 
     private static String readQuizTitle(Scanner sc) {

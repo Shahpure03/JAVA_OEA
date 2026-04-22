@@ -1,6 +1,5 @@
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 public class LeaderboardService {
@@ -24,8 +23,14 @@ public class LeaderboardService {
 
     private static void printTopper(List<QuizAttempt> sortedAttempts) {
         System.out.println("\n===== TOPPER =====");
+        if (sortedAttempts.isEmpty()) {
+            System.out.println("No toppers available.");
+            return;
+        }
+
+        double topScore = sortedAttempts.get(0).getScore();
         sortedAttempts.stream()
-                .max(Comparator.comparingDouble(QuizAttempt::getScore))
-                .ifPresent(topper -> System.out.println("Topper: " + topper.getStudent().getName()));
+                .filter(attempt -> Double.compare(attempt.getScore(), topScore) == 0)
+                .forEach(attempt -> System.out.println("Topper: " + attempt.getStudent().getName()));
     }
 }

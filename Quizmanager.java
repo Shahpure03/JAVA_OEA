@@ -8,12 +8,10 @@ public class QuizManager {
 
     private final List<Student> students;
     private final Map<Integer, Quiz> quizzesById;
-    private final List<QuizAttempt> attempts;
 
     public QuizManager() {
         this.students = new ArrayList<>();
         this.quizzesById = new HashMap<>();
-        this.attempts = new ArrayList<>();
     }
 
     public void addStudent(Student student) {
@@ -24,8 +22,27 @@ public class QuizManager {
         quizzesById.put(quiz.getQuizId(), quiz);
     }
 
-    public void recordAttempts(List<QuizAttempt> newAttempts) {
-        attempts.addAll(newAttempts);
+    public List<Student> getAllStudents() {
+        return new ArrayList<>(students);
+    }
+
+    public Student getStudentById(int studentId) {
+        for (Student student : students) {
+            if (student.getId() == studentId) {
+                return student;
+            }
+        }
+        return null;
+    }
+
+    public Quiz getQuizById(int quizId) {
+        return quizzesById.get(quizId);
+    }
+
+    public List<Integer> getAllQuizIds() {
+        List<Integer> quizIds = new ArrayList<>(quizzesById.keySet());
+        Collections.sort(quizIds);
+        return quizIds;
     }
 
     public void displayAllStudents() {
@@ -46,42 +63,39 @@ public class QuizManager {
         }
 
         for (int quizId : getAllQuizIds()) {
-            Quiz quiz = quizzesById.get(quizId);
-            System.out.println(quiz);
+            System.out.println(quizzesById.get(quizId));
         }
-    }
-
-    public List<Student> getAllStudents() {
-        return new ArrayList<>(students);
-    }
-
-    public Quiz getQuizById(int quizId) {
-        return quizzesById.get(quizId);
-    }
-
-    public List<Integer> getAllQuizIds() {
-        List<Integer> quizIds = new ArrayList<>(quizzesById.keySet());
-        Collections.sort(quizIds);
-        return quizIds;
     }
 
     public void displayLeaderboard(Quiz quiz) {
-        List<QuizAttempt> quizAttempts = getAttemptsForQuiz(quiz);
-        if (quizAttempts.isEmpty()) {
+        List<QuizAttempt> attempts = quiz.getAttempts();
+
+        if (attempts.isEmpty()) {
             System.out.println("===== LEADERBOARD: " + quiz.getTitle() + " =====");
             System.out.println("No attempts recorded for this quiz.");
         } else {
-            LeaderboardService.displayQuizLeaderboard(quiz, quizAttempts);
+            LeaderboardService.displayQuizLeaderboard(quiz, attempts);
         }
     }
 
-    private List<QuizAttempt> getAttemptsForQuiz(Quiz quiz) {
-        List<QuizAttempt> quizAttempts = new ArrayList<>();
-        for (QuizAttempt attempt : attempts) {
-            if (attempt.getQuiz().equals(quiz)) {
-                quizAttempts.add(attempt);
-            }
+    public void displayStudentAttemptHistory(Student student) {
+        System.out.println("\n===== ATTEMPT HISTORY FOR " + student.getName() + " =====");
+        
+        List<QuizAttempt> studentAttempts = getAllQuizIds().stream()
+            .map(this::getQuizById)
+            .flatMap(quiz -> quiz.getAttempts().stream())
+            .filter(attempt -> attempt.getStudent().equals(student))
+            .toList();
+        
+        if (studentAttempts.isEmpty()) {
+            System.out.println("No quiz attempts found for " + student.getName());
+            return;
         }
-        return quizAttempts;
+        
+        studentAttempts.forEach(attempt -> 
+            System.out.println("Quiz: " + attempt.getQuiz().getTitle() + 
+                             " | Score: " + attempt.getScore() + "/" + 
+                             attempt.getQuiz().getTotalQuestions())
+        );
     }
 }

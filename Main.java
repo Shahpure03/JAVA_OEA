@@ -1,67 +1,141 @@
-import java.util.List;
 import java.util.Scanner;
 
 public class Main {
-    private static final int TOTAL_QUIZZES = 3;
+    private static QuizManager quizManager;
+    private static Scanner sc;
 
     public static void main(String[] args) {
-        QuizManager manager = new QuizManager();
+        try (Scanner scanner = new Scanner(System.in)) {
+            sc = scanner;
+            quizManager = new QuizManager();
 
-        System.out.println("===== QUIZ MANAGEMENT SYSTEM =====\n");
+            System.out.println("===== QUIZ MANAGEMENT SYSTEM =====");
 
-        try (Scanner sc = new Scanner(System.in)) {
-            List<Student> students = createStudents(manager, sc);
-            System.out.println("\nStudents Registered:");
-            manager.displayAllStudents();
-            System.out.println();
-            createQuizzes(manager, sc);
-            displayQuizzes(manager);
-            conductAllQuizzes(manager, students, sc);
-        }
-    }
+            boolean running = true;
+            while (running) {
+                printMenu();
+                int choice = InputHelper.readIntInRange(sc, "Enter your choice (1-6): ", 1, 6);
 
-    private static List<Student> createStudents(QuizManager manager, Scanner sc) {
-        int studentCount = InputHelper.readPositiveInt(sc, "Enter number of students: ");
-
-        for (int i = 1; i <= studentCount; i++) {
-            System.out.println("\n===== CREATE STUDENT " + i + " =====");
-
-            int id = InputHelper.readPositiveInt(sc, "Enter Student ID: ");
-            String name = InputHelper.readNonEmptyLine(sc, "Enter Name: ");
-            String branch = InputHelper.readNonEmptyLine(sc, "Enter Branch: ");
-
-            manager.addStudent(new Student(id, name, branch));
-        }
-
-        return manager.getAllStudents();
-    }
-
-    private static void createQuizzes(QuizManager manager, Scanner sc) {
-        for (int quizId = 1; quizId <= TOTAL_QUIZZES; quizId++) {
-            System.out.println();
-            Quiz quiz = QuizBuilder.createQuiz(sc, quizId);
-            manager.addQuiz(quiz);
-        }
-    }
-
-    private static void displayQuizzes(QuizManager manager) {
-        System.out.println("\nQuizzes Created:");
-        manager.displayAllQuizzes();
-    }
-
-    private static void conductAllQuizzes(QuizManager manager, List<Student> students, Scanner sc) {
-        for (int quizId : manager.getAllQuizIds()) {
-            Quiz quiz = manager.getQuizById(quizId);
-            if (quiz == null) {
-                continue;
+                switch (choice) {
+                    case 1 -> createStudent();
+                    case 2 -> createQuiz();
+                    case 3 -> attemptQuiz();
+                    case 4 -> viewLeaderboard();
+                    case 5 -> viewQuizHistory();
+                    case 6 -> {
+                        System.out.println("\nThank you for using Quiz Management System. Goodbye!");
+                        running = false;
+                    }
+                }
             }
-
-            System.out.println("\n===== ATTEMPT QUIZ ID " + quizId + ": " + quiz.getTitle() + " =====");
-            List<QuizAttempt> quizAttempts = QuizService.conductQuiz(quiz, students, sc);
-            manager.recordAttempts(quizAttempts);
-
-            System.out.println();
-            manager.displayLeaderboard(quiz);
         }
+    }
+
+    private static void printMenu() {
+        System.out.println("\n╔══════════════════════════════════════╗");
+        System.out.println("║        QUIZ MANAGEMENT DASHBOARD     ║");
+        System.out.println("╠══════════════════════════════════════╣");
+        System.out.println("║ 1. Create Student                    ║");
+        System.out.println("║ 2. Create Quiz                       ║");
+        System.out.println("║ 3. Attempt a Quiz                    ║");
+        System.out.println("║ 4. View Leaderboard                  ║");
+        System.out.println("║ 5. View Quiz History                 ║");
+        System.out.println("║ 6. Exit                              ║");
+        System.out.println("╚══════════════════════════════════════╝");
+    }
+
+    private static void createStudent() {
+        System.out.println("\n===== CREATE STUDENT =====");
+
+        int id = InputHelper.readPositiveInt(sc, "Enter student ID: ");
+        String name = InputHelper.readNonEmptyLine(sc, "Enter student name: ");
+        String branch = InputHelper.readNonEmptyLine(sc, "Enter student branch: ");
+
+        Student student = new Student(id, name, branch);
+        quizManager.addStudent(student);
+
+        System.out.println("Student created successfully.");
+    }
+
+    private static void createQuiz() {
+        System.out.println("\n===== CREATE QUIZ =====");
+
+        Quiz quiz = QuizBuilder.buildQuiz(sc);
+        quizManager.addQuiz(quiz);
+
+        System.out.println("Quiz created successfully.");
+    }
+
+    private static void attemptQuiz() {
+        System.out.println("\n===== ATTEMPT A QUIZ =====");
+
+        if (quizManager.getAllStudents().isEmpty()) {
+            System.out.println("No students available. Please create students first.");
+            return;
+        }
+
+        if (quizManager.getAllQuizIds().isEmpty()) {
+            System.out.println("No quizzes available. Please create quizzes first.");
+            return;
+        }
+
+        int studentId = InputHelper.readPositiveInt(sc, "Enter student ID: ");
+        Student student = quizManager.getStudentById(studentId);
+
+        if (student == null) {
+            System.out.println("Student not found.");
+            return;
+        }
+
+        int quizId = InputHelper.readPositiveInt(sc, "Enter quiz ID: ");
+        Quiz quiz = quizManager.getQuizById(quizId);
+
+        if (quiz == null) {
+            System.out.println("Quiz not found.");
+            return;
+        }
+
+        QuizAttempt attempt = QuizService.conductQuizForStudent(quiz, student, sc);
+        quiz.addAttempt(attempt);
+
+        System.out.println("Quiz attempt recorded successfully.");
+    }
+
+    private static void viewLeaderboard() {
+        System.out.println("\n===== VIEW LEADERBOARD =====");
+
+        if (quizManager.getAllQuizIds().isEmpty()) {
+            System.out.println("No quizzes available.");
+            return;
+        }
+
+        int quizId = InputHelper.readPositiveInt(sc, "Enter quiz ID: ");
+        Quiz quiz = quizManager.getQuizById(quizId);
+
+        if (quiz == null) {
+            System.out.println("Quiz not found.");
+            return;
+        }
+
+        quizManager.displayLeaderboard(quiz);
+    }
+
+    private static void viewQuizHistory() {
+        System.out.println("\n===== VIEW QUIZ HISTORY =====");
+
+        if (quizManager.getAllStudents().isEmpty()) {
+            System.out.println("No students available.");
+            return;
+        }
+
+        int studentId = InputHelper.readPositiveInt(sc, "Enter student ID: ");
+        Student student = quizManager.getStudentById(studentId);
+
+        if (student == null) {
+            System.out.println("Student not found.");
+            return;
+        }
+
+        quizManager.displayStudentAttemptHistory(student);
     }
 }
