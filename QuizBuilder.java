@@ -5,18 +5,13 @@ import java.util.Scanner;
 public class QuizBuilder {
 
     public static Quiz buildQuiz(Scanner sc) {
-        int quizId = readQuizId(sc);
-        System.out.println("===== CREATE QUIZ " + quizId + " =====");
         String title = readQuizTitle(sc);
         String subject = readQuizSubject(sc);
-        Quiz quiz = new Quiz(quizId, title, subject);
+        Quiz quiz = new Quiz(title, subject);
+        System.out.println("===== CREATE QUIZ " + quiz.getQuizId() + " =====");
         int questionCount = readQuestionCount(sc);
         addQuestionsToQuiz(quiz, questionCount, sc);
         return quiz;
-    }
-
-    private static int readQuizId(Scanner sc) {
-        return InputHelper.readPositiveInt(sc, "Enter Quiz ID: ");
     }
 
     private static String readQuizTitle(Scanner sc) {

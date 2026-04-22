@@ -47,14 +47,13 @@ public class Main {
     private static void createStudent() {
         System.out.println("\n===== CREATE STUDENT =====");
 
-        int id = InputHelper.readPositiveInt(sc, "Enter student ID: ");
         String name = InputHelper.readNonEmptyLine(sc, "Enter student name: ");
         String branch = InputHelper.readNonEmptyLine(sc, "Enter student branch: ");
 
-        Student student = new Student(id, name, branch);
+        Student student = new Student(name, branch);
         quizManager.addStudent(student);
 
-        System.out.println("Student created successfully.");
+        System.out.println("Student created successfully. Assigned ID: " + student.getId());
     }
 
     private static void createQuiz() {
@@ -63,7 +62,7 @@ public class Main {
         Quiz quiz = QuizBuilder.buildQuiz(sc);
         quizManager.addQuiz(quiz);
 
-        System.out.println("Quiz created successfully.");
+        System.out.println("Quiz created successfully. Assigned ID: " + quiz.getQuizId());
     }
 
     private static void attemptQuiz() {
@@ -92,6 +91,11 @@ public class Main {
 
         if (quiz == null) {
             System.out.println("Quiz not found.");
+            return;
+        }
+
+        if (quiz.hasAttemptFromStudent(student)) {
+            System.out.println("You have already attempted this quiz.");
             return;
         }
 

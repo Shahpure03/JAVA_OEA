@@ -2,12 +2,14 @@ import java.util.Objects;
 
 public final class Student {
 
+    private static int nextId = 1;
+
     private final int id;
     private final String name;
     private final String branch;
 
-    public Student(int id, String name, String branch) {
-        this.id = id;
+    public Student(String name, String branch) {
+        this.id = nextId++;
         this.name = name;
         this.branch = branch;
     }

@@ -3,14 +3,16 @@ import java.util.List;
 import java.util.Objects;
 
 public class Quiz {
+    private static int nextId = 1;
+
     private final int quizId;
     private final String title;
     private final String subject;
     private final List<Question> questions;
     private final List<QuizAttempt> attempts;
 
-    public Quiz(int quizId, String title, String subject) {
-        this.quizId = quizId;
+    public Quiz(String title, String subject) {
+        this.quizId = nextId++;
         this.title = title;
         this.subject = subject;
         this.questions = new ArrayList<>();
@@ -42,11 +44,21 @@ public class Quiz {
     }
 
     public void addAttempt(QuizAttempt attempt) {
+        if (hasAttemptFromStudent(attempt.getStudent())) {
+            throw new IllegalStateException(
+                    "Student " + attempt.getStudent().getName() + " has already attempted this quiz."
+            );
+        }
         attempts.add(attempt);
     }
 
     public List<QuizAttempt> getAttempts() {
         return new ArrayList<>(attempts);
+    }
+
+    public boolean hasAttemptFromStudent(Student student) {
+        return attempts.stream()
+                .anyMatch(existingAttempt -> existingAttempt.getStudent().equals(student));
     }
 
     @Override

@@ -8,17 +8,17 @@ It is menu-driven and keeps data in memory while the program is running.
 ## Features with Explanation
 1. Student Registration
 - Creates a student using:
-- `studentId` (positive integer)
 - `name` (non-empty)
 - `branch` (non-empty)
+- `studentId` is auto-assigned by the system.
 - Registered students are stored and can be used for quiz attempts and history lookup.
 
 2. Quiz Creation
 - Creates a quiz using:
-- `quizId` (positive integer)
 - `title` (non-empty)
 - `subject` (non-empty)
 - number of questions (positive integer)
+- `quizId` is auto-assigned by the system.
 - Each quiz contains multiple questions, and each question has 4 options with one correct option.
 
 3. MCQ Question Builder
@@ -42,7 +42,9 @@ It is menu-driven and keeps data in memory while the program is running.
 - Result is shown as `score/totalQuestions`.
 
 6. Attempt Recording
-- Every quiz attempt is saved in that quiz's attempt list.
+- A student can attempt a specific quiz only once.
+- Repeat attempt for the same `studentId` + `quizId` is blocked.
+- Valid first-time attempts are saved in that quiz's attempt list.
 - Stored attempt links:
 - student
 - quiz
